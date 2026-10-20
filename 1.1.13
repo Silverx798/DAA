@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <limits.h>
+
+#define MAX 20
+
+int n, cost[MAX][MAX];
+long long dp[1 << MAX][MAX];
+int visited[1 << MAX][MAX];
+
+long long tsp(int mask, int pos) {
+    if (mask == (1 << n) - 1) {
+        if (cost[pos][0] == -1)
+            return LLONG_MAX / 2;
+        return cost[pos][0];
+    }
+
+    if (visited[mask][pos])
+        return dp[mask][pos];
+
+    visited[mask][pos] = 1;
+    long long ans = LLONG_MAX / 2;
+
+    for (int city = 0; city < n; city++) {
+        if (!(mask & (1 << city)) && cost[pos][city] != -1) {
+            long long next = tsp(mask | (1 << city), city);
+
+            if (next < LLONG_MAX / 2) {
+                long long total = cost[pos][city] + next;
+                if (total < ans)
+                    ans = total;
+            }
+        }
+    }
+
+    return dp[mask][pos] = ans;
+}
+
+int main() {
+    scanf("%d", &n);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &cost[i][j]);
+        }
+    }
+
+    long long ans = tsp(1, 0);
+
+    if (ans >= LLONG_MAX / 2)
+        printf("-1\n");
+    else
+        printf("%lld\n", ans);
+
+    return 0;
+}
+
